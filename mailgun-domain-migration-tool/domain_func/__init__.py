@@ -1,5 +1,4 @@
 # __init__.py
-import requests
 from .domain_operations import Domain
 from .event_operations import get_events
 from .list_operations import get_lists

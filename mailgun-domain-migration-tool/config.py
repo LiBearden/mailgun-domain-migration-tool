@@ -15,5 +15,5 @@ config = {
     "migration_type": {
         "quick_migration": "YES",
         "full_migration": "NO_OR_EMPTY"
-    }
+    },
 }

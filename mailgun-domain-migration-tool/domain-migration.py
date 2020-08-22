@@ -4,10 +4,8 @@
 
 # Created by Elliot "Li" Bearden
 # Aug. 14th, 2020
+
 import domain_func
-import requests
-import json
-from datetime import datetime, timedelta
 from domain_func.domain_operations import Domain
 from config import config
 
@@ -23,7 +21,6 @@ DEST_DOMAIN_NAME = config["destination"]["destination_domain"]
 
 BASE_US = "https://api.mailgun.net/v3"
 BASE_EU = "https://api.eu.mailgun.net/v3"
-BASE_URL = ""
 
 Q_MIGRATION = config["migration_type"]["quick_migration"].lower()
 F_MIGRATION = config["migration_type"]["full_migration"].lower()
@@ -31,39 +28,41 @@ F_MIGRATION = config["migration_type"]["full_migration"].lower()
 
 def src_region():
     if SOURCE_REGION == 'us':
-        BASE_URL = BASE_US
-        return BASE_URL
+        src_url = BASE_US
+        return src_url
     elif SOURCE_REGION == 'eu':
-        BASE_URL = BASE_EU
-        return BASE_URL
+        src_url = BASE_EU
+        return src_url
     else:
         print("Sorry, you have entered an invalid source region. Please check your configuration and try again.")
 
 
 def dest_region():
     if DESTINATION_REGION == 'us':
-        BASE_URL = BASE_US
-        return BASE_URL
+        dest_url = BASE_US
+        return dest_url
     elif DESTINATION_REGION == 'eu':
-        BASE_URL = BASE_EU
-        return BASE_URL
+        dest_url = BASE_EU
+        return dest_url
     else:
         print("Sorry, you have entered an invalid region. Please check your configuration and try again.")
 
 
-s = Domain(SRC_DOMAIN_NAME, SOURCE_REGION)
-d = Domain(DEST_DOMAIN_NAME, DESTINATION_REGION)
+src_region()
+dest_region()
+
+s = Domain(SOURCE_API, base_url, SRC_DOMAIN_NAME, SOURCE_REGION)
+d = Domain(DESTINATION_API, base_url, DEST_DOMAIN_NAME, DESTINATION_REGION)
 
 if Q_MIGRATION == "yes":
     s.delete()
     d.add()
 elif F_MIGRATION == "yes":
-    s.get_lists()
-    s.get_routes()
-    s.get_stats()
-    s.get_events()
+    domain_func.get_add_routes(SOURCE_API, DESTINATION_API, src_url, dest_url, SRC_DOMAIN_NAME)
+    domain_func.get_stats(SOURCE_API, SRC_DOMAIN_NAME, src_url)
+    domain_func.get_events(SOURCE_API, SRC_DOMAIN_NAME, src_url)
     s.delete()
-    s.add()
+    d.add()
 else:
     print("Sorry, it appears that the migration type was not specified. Please check the config.py file for errors.")
 

@@ -1,17 +1,18 @@
 # Function to retrieve routes from the source account
 import requests
-import config
+import json
+from config import config
 
 
-def get_add_routes(self, region, domain=SRC_DOMAIN_NAME):
+def get_add_routes(src_api, dest_api, src_url, dest_url, src_domain):
     routes_list = []
     response = requests.get(
-        f"{BASE_URL}/routes",
-        auth=("api", SOURCE_API),
+        f"{src_url}/routes",
+        auth=("api", src_api),
         params={"skip": 0, "limit": 100})
     routes = json.loads(response)
     for route in routes["items"]:
-        if domain in route["items"]["expression"]:
+        if src_domain in route["items"]["expression"]:
             routes_list.append(route)
 
     # Define functionality to add retrieved routes to destination
@@ -21,8 +22,8 @@ def get_add_routes(self, region, domain=SRC_DOMAIN_NAME):
         route_priority = route["items"]["priority"]
         route_action = route["items"]["actions"]
         create_resp = requests.post(
-            f"{BASE_URL}/routes",
-            auth=("api", DESTINATION_API),
+            f"{dest_url}/routes",
+            auth=("api", dest_api),
             data={"priority": route_priority,
                   "description": route_desc,
                   "expression": route_express,
